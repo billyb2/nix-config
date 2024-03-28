@@ -193,6 +193,12 @@
       enable = false;
     };
 
+    xdg.portal = {
+      enable = true;
+      config.common.default = [ "hyprland" ];
+      extraPortals = with pkgs; [ xdg-desktop-portal-hyprland ];
+    };
+
     wayland.windowManager.hyprland = {
       enable = true;
       package = pkgs.hyprland;
