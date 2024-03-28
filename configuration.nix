@@ -69,7 +69,7 @@
 
   users.users.billy = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" ]; 
 
     packages = with pkgs; [
       tree
@@ -110,6 +110,8 @@
 
       protobuf
       inotify-tools
+      mullvad
+      mullvad-vpn
     ];
 
   };
@@ -122,6 +124,7 @@
 
 
   services.pcscd.enable = true;
+  services.mullvad-vpn.enable = true;
 
   home-manager.users.billy = {
     programs.fish.enable = true;
