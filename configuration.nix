@@ -5,13 +5,12 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      <apple-silicon-support/apple-silicon-support>
-      <home-manager/nixos>
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    <apple-silicon-support/apple-silicon-support>
+    <home-manager/nixos>
+  ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -22,7 +21,8 @@
   networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable =
+    true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -49,7 +49,6 @@
   #desktopManager.gnome.enable = true;
   #};
 
-
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
@@ -64,12 +63,11 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-
   environment.variables.EDITOR = "nvim";
 
   users.users.billy = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; 
+    extraGroups = [ "wheel" ];
 
     packages = with pkgs; [
       tree
@@ -84,8 +82,11 @@
       gopls
       nixfmt
 
-      cargo
       rustc
+      rustfmt
+      cargo
+      cargo-outdated
+      cargo-watch
       rust-analyzer
       mold
 
@@ -97,31 +98,47 @@
 
       clang
       clang-tools
-      glslang
-      direnv
+      libtool
       cmake
       gnumake
 
-      zig
+      glslang
 
+      texlive.combined.scheme-full
+
+      direnv
+
+      zig
       python3
+
+      nodejs
+
       elixir
       elixir-ls
+
+      ruby
+      rubyfmt
+      rubyPackages.solargraph
+
+      typescript
 
       protobuf
       inotify-tools
       mullvad
       mullvad-vpn
+      hyprshade
+      obs-studio
+      rofi-screenshot
+      box64
+      #qemu
     ];
 
   };
-
 
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
   };
-
 
   services.pcscd.enable = true;
   services.mullvad-vpn.enable = true;
@@ -129,14 +146,15 @@
   home-manager.users.billy = {
     programs.fish.enable = true;
     programs.alacritty.enable = true;
+    programs.neovim.enable = true;
 
     programs.emacs = {
-       enable = true;
-       package = pkgs.emacs29-pgtk;
-       #environment.systemPackages = with pkgs; [
-       #   emacsPackages.vterm
-       #   emacsPackages.adwaita-dark-theme 
-       #];
+      enable = true;
+      package = pkgs.emacs29-pgtk;
+      #environment.systemPackages = with pkgs; [
+      #   emacsPackages.vterm
+      #   emacsPackages.adwaita-dark-theme 
+      #];
     };
 
     programs.git = {
@@ -172,26 +190,32 @@
         DisablePocket = true;
 
         ExtensionSettings = {
-          "*".installation_mode = "blocked"; # blocks all addons except the ones specified below
+          "*".installation_mode =
+            "blocked"; # blocks all addons except the ones specified below
           # uBlock Origin:
           "uBlock0@raymondhill.net" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+            install_url =
+              "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+            installation_mode = "force_installed";
+          };
+          # Bitwarden:
+          "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+            install_url =
+              "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
             installation_mode = "force_installed";
           };
         };
 
         # Check about:config for options.
-	Preferences = {
-	  "extensions.pocket.enabled" = false;
-	  "browser.startup.page" = 3;
-	};
+        Preferences = {
+          "extensions.pocket.enabled" = false;
+          "browser.startup.page" = 3;
+        };
 
       };
     };
 
-    programs.waybar = {
-      enable = false;
-    };
+    programs.waybar = { enable = false; };
 
     xdg.portal = {
       enable = true;
@@ -238,6 +262,59 @@
 
     };
 
+    home.file = {
+      # I like my blue light filter
+      "/home/billy/.config/hypr/shaders/blue-light-filter.glsl" = {
+        text = ''
+          // from https://github.com/hyprwm/Hyprland/issues/1140#issuecomment-1335128437
+
+          precision highp float;
+          varying vec2 v_texcoord;
+          uniform sampler2D tex;
+
+          const float temperature = 2600.0;
+          const float temperatureStrength = 1.0;
+
+          #define WithQuickAndDirtyLuminancePreservation
+          const float LuminancePreservationFactor = 1.0;
+
+          // function from https://www.shadertoy.com/view/4sc3D7
+          // valid from 1000 to 40000 K (and additionally 0 for pure full white)
+          vec3 colorTemperatureToRGB(const in float temperature) {
+              // values from: http://blenderartists.org/forum/showthread.php?270332-OSL-Goodness&p=2268693&viewfull=1#post2268693
+              mat3 m = (temperature <= 6500.0) ? mat3(vec3(0.0, -2902.1955373783176, -8257.7997278925690),
+                                                      vec3(0.0, 1669.5803561666639, 2575.2827530017594),
+                                                      vec3(1.0, 1.3302673723350029, 1.8993753891711275))
+                                               : mat3(vec3(1745.0425298314172, 1216.6168361476490, -8257.7997278925690),
+                                                      vec3(-2666.3474220535695, -2173.1012343082230, 2575.2827530017594),
+                                                      vec3(0.55995389139931482, 0.70381203140554553, 1.8993753891711275));
+              return mix(clamp(vec3(m[0] / (vec3(clamp(temperature, 1000.0, 40000.0)) + m[1]) + m[2]), vec3(0.0), vec3(1.0)),
+                         vec3(1.0), smoothstep(1000.0, 0.0, temperature));
+          }
+
+          void main() {
+              vec4 pixColor = texture2D(tex, v_texcoord);
+
+              // RGB
+              vec3 color = vec3(pixColor[0], pixColor[1], pixColor[2]);
+
+          #ifdef WithQuickAndDirtyLuminancePreservation
+              color *= mix(1.0, dot(color, vec3(0.2126, 0.7152, 0.0722)) / max(dot(color, vec3(0.2126, 0.7152, 0.0722)), 1e-5),
+                           LuminancePreservationFactor);
+          #endif
+
+              color = mix(color, color * colorTemperatureToRGB(temperature), temperatureStrength);
+
+              vec4 outCol = vec4(color, pixColor[3]);
+
+              gl_FragColor = outCol;
+          }
+          	'';
+        executable = false;
+
+      };
+    };
+
     home.stateVersion = "24.05";
   };
 
@@ -252,13 +329,9 @@
     ];
   };
 
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    wget
-  ];
+  environment.systemPackages = with pkgs; [ wget ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
