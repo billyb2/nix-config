@@ -124,13 +124,18 @@
 
       protobuf
       inotify-tools
-      mullvad
       mullvad-vpn
       hyprshade
-      obs-studio
       rofi-screenshot
-      box64
-      #qemu
+      ffcast
+      slop
+      xclip
+      okular
+      wl-clipboard
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
+      flyctl
+      nwg-panel
     ];
 
   };
@@ -142,11 +147,22 @@
 
   services.pcscd.enable = true;
   services.mullvad-vpn.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+  services.pipewire.wireplumber.configPackages = [
+    (pkgs.writeTextDir "share/wireplumber/bluetooth.lua.d/51-bluez-config.lua"
+      "	bluez_monitor.properties = {\n		[\"bluez5.enable-sbc-xq\"] = true,\n		[\"bluez5.enable-msbc\"] = true,\n		[\"bluez5.enable-hw-volume\"] = true,\n		[\"bluez5.headset-roles\"] = \"[ hsp_hs hsp_ag hfp_hf hfp_ag ]\"\n	}\n")
+  ];
 
   home-manager.users.billy = {
     programs.fish.enable = true;
     programs.alacritty.enable = true;
     programs.neovim.enable = true;
+    programs.obs-studio.enable = true;
 
     programs.emacs = {
       enable = true;
@@ -215,12 +231,13 @@
       };
     };
 
-    programs.waybar = { enable = false; };
-
     xdg.portal = {
       enable = true;
       config.common.default = [ "hyprland" ];
-      extraPortals = with pkgs; [ xdg-desktop-portal-hyprland ];
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-hyprland
+        xdg-desktop-portal-gtk
+      ];
     };
 
     wayland.windowManager.hyprland = {
@@ -230,7 +247,7 @@
       systemd.enable = true;
 
       settings = {
-        exec-once = "waybar";
+        exec-once = "nwg-panel";
         env = "XCURSOR_SIZE,24";
 
         input = {
