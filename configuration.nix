@@ -136,6 +136,7 @@
       xdg-desktop-portal-gtk
       flyctl
       nwg-panel
+      blueberry
     ];
 
   };
@@ -157,6 +158,7 @@
     (pkgs.writeTextDir "share/wireplumber/bluetooth.lua.d/51-bluez-config.lua"
       "	bluez_monitor.properties = {\n		[\"bluez5.enable-sbc-xq\"] = true,\n		[\"bluez5.enable-msbc\"] = true,\n		[\"bluez5.enable-hw-volume\"] = true,\n		[\"bluez5.headset-roles\"] = \"[ hsp_hs hsp_ag hfp_hf hfp_ag ]\"\n	}\n")
   ];
+  services.blueman.enable = true;
 
   home-manager.users.billy = {
     programs.fish.enable = true;
@@ -395,6 +397,11 @@
 
   hardware.opengl.enable = true;
   hardware.opengl.driSupport = true;
+
+  hardware.asahi.enable = true;
+
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
 
   hardware.asahi.withRust = true;
   hardware.asahi.useExperimentalGPUDriver = true;
