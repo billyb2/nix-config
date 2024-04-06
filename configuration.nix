@@ -122,7 +122,12 @@
 
       typescript
 
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
+
       protobuf
+      sqlite
+
       inotify-tools
       mullvad-vpn
       hyprshade
@@ -132,11 +137,10 @@
       xclip
       okular
       wl-clipboard
-      xdg-desktop-portal-hyprland
-      xdg-desktop-portal-gtk
       flyctl
       nwg-panel
       blueberry
+      tailscale
     ];
 
   };
@@ -159,6 +163,7 @@
       "	bluez_monitor.properties = {\n		[\"bluez5.enable-sbc-xq\"] = true,\n		[\"bluez5.enable-msbc\"] = true,\n		[\"bluez5.enable-hw-volume\"] = true,\n		[\"bluez5.headset-roles\"] = \"[ hsp_hs hsp_ag hfp_hf hfp_ag ]\"\n	}\n")
   ];
   services.blueman.enable = true;
+  services.tailscale.enable = true;
 
   home-manager.users.billy = {
     programs.fish.enable = true;
@@ -369,7 +374,7 @@
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  networking.firewall.enable = true;
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
