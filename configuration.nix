@@ -26,6 +26,7 @@
 
   # Set your time zone.
   time.timeZone = "America/New_York";
+  nixpkgs.config.allowUnfree = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -67,13 +68,12 @@
 
   users.users.billy = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "docker" ];
 
     packages = with pkgs; [
       tree
       wofi
       alacritty
-      magic-wormhole
       gnupg
       brightnessctl
       ripgrep
@@ -82,12 +82,7 @@
       gopls
       nixfmt
 
-      rustc
-      rustfmt
-      cargo
-      cargo-outdated
-      cargo-watch
-      rust-analyzer
+      rustup
       mold
 
       gopls
@@ -111,9 +106,19 @@
       zig
       python3
 
+      curl
+      dbus
+      openssl_3
+      glib
+      gtk3
+      libsoup
+      webkitgtk
+      librsvg
+
       nodejs
 
       elixir
+      erlang
       elixir-ls
 
       ruby
@@ -121,6 +126,7 @@
       rubyPackages.solargraph
 
       typescript
+      nodePackages.typescript-language-server
 
       xdg-desktop-portal-hyprland
       xdg-desktop-portal-gtk
@@ -128,22 +134,46 @@
       protobuf
       sqlite
 
+      rofi-screenshot
+      grim
+
+      qemu
+
+      pkg-config
+
+      webkitgtk
+      gtk3
+      cairo
+      gdk-pixbuf
+      glib
+      dbus
+      openssl_3
+      librsvg
+
       inotify-tools
       mullvad-vpn
       hyprshade
-      rofi-screenshot
       ffcast
       slop
       xclip
       okular
       wl-clipboard
-      flyctl
       nwg-panel
       blueberry
       tailscale
+      htop
+      dust
+      file
+      b3sum
+      signal-desktop
+      element-desktop
+      prismlauncher
+      qbittorrent
     ];
 
   };
+
+  virtualisation.docker.enable = true;
 
   programs.gnupg.agent = {
     enable = true;
@@ -152,6 +182,7 @@
 
   services.pcscd.enable = true;
   services.mullvad-vpn.enable = true;
+  services.printing.enable = true;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -164,9 +195,21 @@
   ];
   services.blueman.enable = true;
   services.tailscale.enable = true;
+  services.logind = {
+    lidSwitch = "suspend";
+    lidSwitchDocked = "suspend";
+  };
 
   home-manager.users.billy = {
-    programs.fish.enable = true;
+    programs.fish = {
+      enable = true;
+      shellInit = ''
+                direnv hook fish | source
+                fish_add_path $HOME/.fly/bin/
+        	fish_add_path ~/.config/doom/bin/
+        	fish_add_path ~/.mix/escripts/
+      '';
+    };
     programs.alacritty.enable = true;
     programs.neovim.enable = true;
     programs.obs-studio.enable = true;
@@ -281,6 +324,17 @@
           "$mainMod, 8, workspace, 8"
           "$mainMod, 9, workspace, 9"
           "$mainMod, 0, workspace, 0"
+
+          "$mainMod SHIFT, 1, movetoworkspace, 1"
+          "$mainMod SHIFT, 2, movetoworkspace, 2"
+          "$mainMod SHIFT, 3, movetoworkspace, 3"
+          "$mainMod SHIFT, 4, movetoworkspace, 4"
+          "$mainMod SHIFT, 5, movetoworkspace, 5"
+          "$mainMod SHIFT, 6, movetoworkspace, 6"
+          "$mainMod SHIFT, 7, movetoworkspace, 7"
+          "$mainMod SHIFT, 8, movetoworkspace, 8"
+          "$mainMod SHIFT, 9, movetoworkspace, 9"
+          "$mainMod SHIFT, 0, movetoworkspace, 0"
         ];
       };
 
@@ -374,7 +428,7 @@
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  networking.firewall.enable = true;
+  networking.firewall.enable = false;
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
@@ -407,6 +461,8 @@
 
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
+
+  hardware.keyboard.zsa.enable = true;
 
   hardware.asahi.withRust = true;
   hardware.asahi.useExperimentalGPUDriver = true;
