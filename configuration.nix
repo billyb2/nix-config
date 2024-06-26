@@ -13,6 +13,7 @@
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.auto-optimise-store = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -122,7 +123,6 @@
       elixir-ls
 
       ruby
-      rubyfmt
       rubyPackages.solargraph
 
       typescript
@@ -149,6 +149,7 @@
       dbus
       openssl_3
       librsvg
+      vlc
 
       inotify-tools
       mullvad-vpn
@@ -169,16 +170,11 @@
       element-desktop
       prismlauncher
       qbittorrent
+      pinentry-curses
     ];
-
   };
 
   virtualisation.docker.enable = true;
-
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
 
   services.pcscd.enable = true;
   services.mullvad-vpn.enable = true;
@@ -279,6 +275,12 @@
         };
 
       };
+    };
+    services.gpg-agent = {
+      enable = true;
+      enableSshSupport = true;
+      pinentryPackage = pkgs.pinentry-curses;
+      enableFishIntegration = true;
     };
 
     xdg.portal = {
@@ -454,8 +456,7 @@
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "24.05"; # Did you read the comment?
 
-  hardware.opengl.enable = true;
-  hardware.opengl.driSupport = true;
+  hardware.graphics.enable = true;
 
   hardware.asahi.enable = true;
 
