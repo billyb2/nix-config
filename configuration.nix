@@ -5,11 +5,10 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      <home-manager/nixos>
-    ];
+  imports = [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    <home-manager/nixos>
+  ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -19,7 +18,9 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  boot.initrd.luks.devices."luks-5f17ef12-885a-484c-a5b8-1e8eb0a6226a".device = "/dev/disk/by-uuid/5f17ef12-885a-484c-a5b8-1e8eb0a6226a";
+  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.initrd.luks.devices."luks-5f17ef12-885a-484c-a5b8-1e8eb0a6226a".device =
+    "/dev/disk/by-uuid/5f17ef12-885a-484c-a5b8-1e8eb0a6226a";
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -54,7 +55,7 @@
     shell = pkgs.fish;
     ignoreShellProgramCheck = true;
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [ "wheel" "docker" "adbusers" "kvm" ];
 
     packages = with pkgs; [
       tree
@@ -84,6 +85,7 @@
       gnumake
 
       glslang
+      slint-lsp
 
       texlive.combined.scheme-full
 
@@ -117,6 +119,7 @@
       xdg-desktop-portal-gtk
 
       protobuf
+      protoc-gen-go
       sqlite
 
       rofi-screenshot
@@ -144,7 +147,6 @@
       xclip
       okular
       wl-clipboard
-      nwg-panel
       blueberry
       tailscale
       htop
@@ -160,15 +162,21 @@
       ollama
       pavucontrol
       elixir-ls
+      waybar
+      sidequest
+      libreoffice-qt
+      hunspell
     ];
   };
-    programs.steam = {
-	  enable = true;
-	  remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-	  dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-	  localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
-	};
-
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall =
+      true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall =
+      true; # Open ports in the firewall for Source Dedicated Server
+    localNetworkGameTransfers.openFirewall =
+      true; # Open ports in the firewall for Steam Local Network Game Transfers
+  };
 
   virtualisation.docker.enable = true;
 
@@ -194,14 +202,44 @@
   services.flatpak.enable = true;
   services.fwupd.enable = true;
   xdg.portal = {
-      enable = true;
-      config.common.default = [ "hyprland" ];
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-        xdg-desktop-portal-gtk
-      ];
-    };
+    enable = true;
+    config.common.default = [ "hyprland" ];
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
+    ];
+  };
+  services.udev.extraRules = ''
+    # This rule is needed for basic functionality of the controller in Steam and keyboard/mouse emulation
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
 
+    # This rule is necessary for gamepad emulation; make sure you replace 'pgriffais' with a group that the user that runs Steam belongs to
+    KERNEL=="uinput", MODE="0660", GROUP="pgriffais", OPTIONS+="static_node=uinput"
+
+    # Valve HID devices over USB hidraw
+    KERNEL=="hidraw*", ATTRS{idVendor}=="28de", MODE="0666"
+
+    # Valve HID devices over bluetooth hidraw
+    KERNEL=="hidraw*", KERNELS=="*28DE:*", MODE="0666"
+
+    # DualShock 4 over USB hidraw
+    KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
+
+    # DualShock 4 wireless adapter over USB hidraw
+    KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ba0", MODE="0666"
+
+    # DualShock 4 Slim over USB hidraw
+    KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
+
+    # DualShock 4 over bluetooth hidraw
+    KERNEL=="hidraw*", KERNELS=="*054C:05C4*", MODE="0666"
+
+    # DualShock 4 Slim over bluetooth hidraw
+    KERNEL=="hidraw*", KERNELS=="*054C:09CC*", MODE="0666"
+  '';
+
+  programs.alvr.enable = true;
+  programs.adb.enable = true;
 
   home-manager.users.billy = {
     programs.fish = {
@@ -299,6 +337,17 @@
       ];
     };
 
+    xdg.configFile."openxr/1/active_runtime.json".text = ''
+      {
+        "file_format_version" : "1.0.0",
+        "runtime" : {
+          "VALVE_runtime_is_steamvr" : true,
+          "library_path" : "/home/billy/.local/share/Steam/steamapps/common/SteamVR/bin/linux64/vrclient.so",
+          "name" : "SteamVR"
+        }
+      }
+    '';
+
     wayland.windowManager.hyprland = {
       enable = true;
       package = pkgs.hyprland;
@@ -306,7 +355,7 @@
       systemd.enable = true;
 
       settings = {
-        exec-once = "nwg-panel";
+        exec-once = "waybar";
         env = "XCURSOR_SIZE,24";
 
         input = {
@@ -405,16 +454,17 @@
     home.stateVersion = "24.05";
   };
 
-  fonts = {
-    enableDefaultPackages = true;
-    packages = with pkgs; [
-      noto-fonts
-      noto-fonts-cjk
-      noto-fonts-emoji
-      fira-code
-      fira-code-symbols
-    ];
-  };
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-cjk
+    noto-fonts-emoji
+    liberation_ttf
+    fira-code
+    fira-code-symbols
+    mplus-outline-fonts.githubRelease
+    dina-font
+    proggyfonts
+  ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -473,11 +523,13 @@
     enable32Bit = true;
   };
   hardware.enableAllFirmware = true;
-  
+
   hardware.bluetooth.enable = true;
+  hardware.bluetooth.package = pkgs.bluez;
   hardware.bluetooth.powerOnBoot = false;
 
-  hardware.keyboard.zsa.enable = true;
+  hardware.pulseaudio.enable = false;
 
+  hardware.keyboard.zsa.enable = true;
 
 }
