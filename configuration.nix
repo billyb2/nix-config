@@ -166,6 +166,9 @@
       sidequest
       libreoffice-qt
       hunspell
+      hunspellDicts.en_US
+      gscreenshot
+      raylib
     ];
   };
   programs.steam = {
@@ -178,11 +181,11 @@
       true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
 
-  virtualisation.docker.enable = true;
+  virtualisation.docker.enable = false;
 
-  services.pcscd.enable = true;
-  services.mullvad-vpn.enable = true;
-  services.printing.enable = true;
+  services.pcscd.enable = false;
+  services.mullvad-vpn.enable = false;
+  services.printing.enable = false;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -193,7 +196,7 @@
     (pkgs.writeTextDir "share/wireplumber/bluetooth.lua.d/51-bluez-config.lua"
       "	bluez_monitor.properties = {\n		[\"bluez5.enable-sbc-xq\"] = true,\n		[\"bluez5.enable-msbc\"] = true,\n		[\"bluez5.enable-hw-volume\"] = true,\n		[\"bluez5.headset-roles\"] = \"[ hsp_hs hsp_ag hfp_hf hfp_ag ]\"\n	}\n")
   ];
-  services.blueman.enable = true;
+  services.blueman.enable = false;
   services.tailscale.enable = true;
   services.logind = {
     lidSwitch = "suspend";
@@ -258,10 +261,6 @@
     programs.emacs = {
       enable = true;
       package = pkgs.emacs29-pgtk;
-      #environment.systemPackages = with pkgs; [
-      #   emacsPackages.vterm
-      #   emacsPackages.adwaita-dark-theme 
-      #];
     };
 
     programs.git = {
@@ -381,7 +380,7 @@
           "$mainMod, 7, workspace, 7"
           "$mainMod, 8, workspace, 8"
           "$mainMod, 9, workspace, 9"
-          "$mainMod, 0, workspace, 0"
+          "$mainMod, 0, workspace, 10"
 
           "$mainMod SHIFT, 1, movetoworkspace, 1"
           "$mainMod SHIFT, 2, movetoworkspace, 2"
@@ -392,7 +391,7 @@
           "$mainMod SHIFT, 7, movetoworkspace, 7"
           "$mainMod SHIFT, 8, movetoworkspace, 8"
           "$mainMod SHIFT, 9, movetoworkspace, 9"
-          "$mainMod SHIFT, 0, movetoworkspace, 0"
+          "$mainMod SHIFT, 0, movetoworkspace, 10"
         ];
       };
 
