@@ -11,13 +11,20 @@
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.auto-optimise-store = true;
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+
+  nixpkgs.config.allowUnfree = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  nixpkgs.config.allowUnfree = true;
-
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.initrd.luks.devices."luks-5f17ef12-885a-484c-a5b8-1e8eb0a6226a".device =
     "/dev/disk/by-uuid/5f17ef12-885a-484c-a5b8-1e8eb0a6226a";
@@ -49,7 +56,8 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  environment.variables.EDITOR = "nvim";
+  environment.sessionVariables.EDITOR = "nvim";
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   users.users.billy = {
     shell = pkgs.fish;
@@ -92,7 +100,7 @@
       direnv
 
       zig
-      python3
+      python3Full
 
       curl
       dbus
@@ -100,7 +108,7 @@
       glib
       gtk3
       libsoup
-      webkitgtk
+      webkitgtk_4_1
       librsvg
 
       nodejs
@@ -112,7 +120,6 @@
       ruby
       rubyPackages.solargraph
 
-      typescript
       nodePackages.typescript-language-server
 
       xdg-desktop-portal-hyprland
@@ -129,7 +136,6 @@
 
       pkg-config
 
-      webkitgtk
       gtk3
       cairo
       gdk-pixbuf
@@ -169,6 +175,23 @@
       hunspellDicts.en_US
       gscreenshot
       raylib
+      slack
+      killall
+      hyprpaper
+      resumed
+      xdg-utils
+      tor-browser-bundle-bin
+      deno
+      bottles
+      cemu
+      bun
+      pnpm
+      gamemode
+      wormhole-william
+      libqalculate
+      vivaldi
+      nodePackages.prettier
+      dbeaver-bin
     ];
   };
   programs.steam = {
@@ -181,10 +204,16 @@
       true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
 
-  virtualisation.docker.enable = false;
+  nixpkgs.config.android_sdk.accept_license = true;
+
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
+  };
 
   services.pcscd.enable = false;
-  services.mullvad-vpn.enable = false;
+  services.mullvad-vpn.enable = true;
   services.printing.enable = false;
   services.pipewire = {
     enable = true;
@@ -244,14 +273,21 @@
   programs.alvr.enable = true;
   programs.adb.enable = true;
 
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+    pinentryPackage = pkgs.pinentry-qt;
+  };
+
   home-manager.users.billy = {
     programs.fish = {
       enable = true;
       shellInit = ''
-                direnv hook fish | source
-                fish_add_path $HOME/.fly/bin/
-        	fish_add_path ~/.config/doom/bin/
-        	fish_add_path ~/.mix/escripts/
+        direnv hook fish | source
+        fish_add_path ~/.fly/bin/
+        fish_add_path ~/.config/doom/bin/
+        fish_add_path ~/.mix/escripts/
+        fish_add_path ~/.depot/bin/
       '';
     };
     programs.alacritty.enable = true;
@@ -260,7 +296,7 @@
 
     programs.emacs = {
       enable = true;
-      package = pkgs.emacs29-pgtk;
+      package = pkgs.emacs30-pgtk;
     };
 
     programs.git = {
@@ -320,11 +356,20 @@
 
       };
     };
+
     services.gpg-agent = {
       enable = true;
       enableSshSupport = true;
-      pinentryPackage = pkgs.pinentry-curses;
+      pinentryPackage = pkgs.pinentry-qt;
       enableFishIntegration = true;
+    };
+
+    services.hyprpaper = {
+      enable = true;
+      settings = {
+        preload = [ "~/.wallpapers/kde.jpg" ];
+        wallpaper = [ ", ~/.wallpapers/kde.jpg" ];
+      };
     };
 
     xdg.portal = {
@@ -455,7 +500,7 @@
 
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-cjk
+    noto-fonts-cjk-sans
     noto-fonts-emoji
     liberation_ttf
     fira-code
