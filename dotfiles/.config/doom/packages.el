@@ -53,3 +53,6 @@
 
 (package! copilot-chat
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el" "dist")))
+
+(package! code-review
+  :recipe (:host github :repo "doomelpa/code-review" :files ("*.el" "dist")))

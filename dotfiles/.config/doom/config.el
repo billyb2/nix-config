@@ -80,6 +80,8 @@
 
 (use-package copilot-chat)
 
+(copilot-chat-set-model "claude-3.5-sonnet")
+
 (defvar *true-visual* nil)
 
 (defun helix-visual-mode ()
@@ -180,12 +182,8 @@
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<tab>" . 'copilot-accept-completion-by-word)))
 
-(defun copilot-turn-on-unless-buffer-read-only ()
-  "Turn on `copilot-mode' if the buffer is writable."
-  (unless (or buffer-read-only (not (buffer-file-name (current-buffer))))
-    (copilot-mode 1))) ; basically global copilot mode, but doesn't crash
-
-(copilot-turn-on-unless-buffer-read-only)
+(add-hook 'text-mode-hook 'copilot-mode)
+(add-hook 'prog-mode-hook 'copilot-mode)
 
 (global-set-key (kbd "C-l") 'mc/mark-next-like-this)
 
@@ -195,6 +193,10 @@
 
 (require 'lsp-mode)
 (require 'go-mode)
+
+(add-to-list 'load-path "~/.config/doom/")
+
+(require 'protobuf-mode)
 
 (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
 
