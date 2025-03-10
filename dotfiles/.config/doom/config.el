@@ -191,6 +191,24 @@
 
 ;;; slint-mode.el ends here
 
+(use-package lsp-mode
+  :ensure t
+  :commands lsp)
+
+;; Configure MDX LSP mode
+(use-package lsp-mdx
+  :ensure t
+  :custom
+  (lsp-mdx-server-command "mdx-language-server")
+  (lsp-mdx-server-command-args '("--stdio"))
+  :hook
+  (mdx-mode . lsp))
+
+;; Set up mdx-mode for .mdx files
+(use-package mdx-mode
+  :ensure t
+  :mode "\\.mdx\\'")
+
 (require 'lsp-mode)
 (require 'go-mode)
 
