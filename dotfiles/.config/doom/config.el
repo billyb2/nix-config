@@ -78,10 +78,6 @@
   :after magit)
 (setq auth-sources '("~/.authinfo"))
 
-(use-package copilot-chat)
-
-(copilot-chat-set-model "claude-3.5-sonnet")
-
 (defvar *true-visual* nil)
 
 (defun helix-visual-mode ()
@@ -205,7 +201,7 @@
   (mdx-mode . lsp))
 
 ;; Set up mdx-mode for .mdx files
-(use-package mdx-mode
+(use-package mdx
   :ensure t
   :mode "\\.mdx\\'")
 
@@ -215,8 +211,6 @@
 (add-to-list 'load-path "~/.config/doom/")
 
 (require 'protobuf-mode)
-
-(add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
 
 (add-hook 'go-mode-hook 'lsp-deferred)
 (add-hook 'go-mode-hook 'subword-mode)
