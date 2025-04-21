@@ -151,7 +151,7 @@
       ffcast
       slop
       xclip
-      okular
+      kdePackages.okular
       wl-clipboard
       blueberry
       tailscale
@@ -180,10 +180,8 @@
       hyprpaper
       resumed
       xdg-utils
-      tor-browser-bundle-bin
       deno
       bottles
-      cemu
       bun
       pnpm
       gamemode
@@ -192,6 +190,15 @@
       vivaldi
       nodePackages.prettier
       dbeaver-bin
+      libreoffice-qt
+      virtualbox
+      kdePackages.kdenlive
+
+      flutter
+      jdk17
+      p7zip
+      gdb
+      ffmpeg-full
     ];
   };
   programs.steam = {
@@ -206,12 +213,15 @@
 
   nixpkgs.config.android_sdk.accept_license = true;
 
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "billy" ];
   virtualisation.docker.enable = true;
   virtualisation.docker.rootless = {
     enable = true;
     setSocketVariable = true;
   };
 
+  services.hardware.bolt.enable = true;
   services.pcscd.enable = false;
   services.mullvad-vpn.enable = true;
   services.printing.enable = false;
@@ -226,7 +236,7 @@
       "	bluez_monitor.properties = {\n		[\"bluez5.enable-sbc-xq\"] = true,\n		[\"bluez5.enable-msbc\"] = true,\n		[\"bluez5.enable-hw-volume\"] = true,\n		[\"bluez5.headset-roles\"] = \"[ hsp_hs hsp_ag hfp_hf hfp_ag ]\"\n	}\n")
   ];
   services.blueman.enable = false;
-  services.tailscale.enable = true;
+  services.tailscale.enable = false;
   services.logind = {
     lidSwitch = "suspend";
     lidSwitchDocked = "suspend";
@@ -301,6 +311,7 @@
 
     programs.git = {
       enable = true;
+      lfs.enable = true;
       userName = "Billy Batista";
       userEmail = "bootlegbilly@protonmail.ch";
 
@@ -410,6 +421,11 @@
         };
 
         "$mainMod" = "SUPER";
+
+        monitor = [
+          "DP-7, modeline 118.25 1600 1696 1856 2112 900 903 908 934 -hsync +vsync, 0x0, 1"
+          "DP-6, modeline 118.25 1600 1696 1856 2112 900 903 908 934 -hsync +vsync, 0x0, 1"
+        ];
 
         bind = [
           "$mainMod, Q, exec, alacritty"
@@ -571,8 +587,6 @@
   hardware.bluetooth.enable = true;
   hardware.bluetooth.package = pkgs.bluez;
   hardware.bluetooth.powerOnBoot = false;
-
-  hardware.pulseaudio.enable = false;
 
   hardware.keyboard.zsa.enable = true;
 
