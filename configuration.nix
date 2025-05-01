@@ -24,7 +24,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_zen;
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.initrd.luks.devices."luks-5f17ef12-885a-484c-a5b8-1e8eb0a6226a".device =
     "/dev/disk/by-uuid/5f17ef12-885a-484c-a5b8-1e8eb0a6226a";
@@ -215,7 +215,7 @@
 
   virtualisation.virtualbox.host.enable = true;
   users.extraGroups.vboxusers.members = [ "billy" ];
-  virtualisation.docker.enable = true;
+  virtualisation.docker.enable = false;
   virtualisation.docker.rootless = {
     enable = true;
     setSocketVariable = true;
