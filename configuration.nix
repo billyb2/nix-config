@@ -159,7 +159,7 @@
       dust
       file
       b3sum
-      signal-desktop
+      signal-desktop-bin
       element-desktop
       prismlauncher
       qbittorrent
@@ -199,6 +199,11 @@
       p7zip
       gdb
       ffmpeg-full
+      linuxKernel.packages.linux_6_14.cpupower
+      gimp3
+      imagemagick
+      exfatprogs
+      pandoc
     ];
   };
   programs.steam = {
