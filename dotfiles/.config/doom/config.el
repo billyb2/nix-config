@@ -227,3 +227,15 @@
 
 (after! lsp-mode
   (setq lsp-diagnostics-provider :flycheck))
+
+;; Configure eat
+(use-package! eat
+  :config
+  ;; Set eat as the default terminal
+  (setq eat-kill-buffer-on-exit t)
+  ;; Use fish shell by default
+  (setq eat-shell (executable-find "fish")))
+
+;; Configure claude-code-ide to use eat
+(after! claude-code-ide
+  (setq claude-code-ide-terminal-backend 'eat))

@@ -56,3 +56,14 @@
 
 (package! code-review
   :recipe (:host github :repo "doomelpa/code-review" :files ("*.el" "dist")))
+
+(package! claude-code-ide
+  :recipe (:host github :repo "manzaltu/claude-code-ide.el"))
+
+(package! eat
+  :recipe (:host codeberg :repo "akib/emacs-eat"
+           :files ("*.el" ("term" "term/*.el") "*.texi"
+                   "*.ti" ("terminfo/e" "terminfo/e/*")
+                   ("terminfo/65" "terminfo/65/*")
+                   ("integration" "integration/*")
+                   (:exclude ".dir-locals.el" "*-tests.el"))))
