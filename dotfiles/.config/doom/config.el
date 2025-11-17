@@ -254,9 +254,34 @@
 
 ;; Disable LSP formatting in favor of apheleia for TS/JS
 
+;; make tramp usable
+(connection-local-set-profile-variables
+ 'my-dired-profile
+ '((dired-check-symlinks . nil)))
+
+(connection-local-set-profiles
+ '(:application tramp :machine "remotehost")
+ 'my-dired-profile)
+
+(setq remote-file-name-inhibit-locks t
+      tramp-use-scp-direct-remote-copying t
+      remote-file-name-inhibit-auto-save-visited t)
+
+(connection-local-set-profile-variables
+ 'remote-direct-async-process
+ '((tramp-direct-async-process . t)))
+
+(connection-local-set-profiles
+ '(:application tramp :protocol "scp")
+ 'remote-direct-async-process)
+
+(setq magit-tramp-pipe-stty-settings 'pty)
+(setq remote-file-name-inhibit-auto-save t)
+
 ;;perf
 (setq +format-with-lsp nil)
 (setq vterm-timer-delay nil)
 (setq gc-cons-threshold 100000000) 
 (setenv "LSP_USE_PLISTS" "true")
 (setq lsp-use-plists t)
+
