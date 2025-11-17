@@ -239,3 +239,24 @@
 ;; Configure claude-code-ide to use eat
 (after! claude-code-ide
   (setq claude-code-ide-terminal-backend 'eat))
+
+;; Format with bun prettier only for TS/JS files
+(after! apheleia
+  (setf (alist-get 'prettier apheleia-formatters)
+        '("bun" "prettier" "--stdin-filepath" filepath))
+
+  ;; Only use prettier for TS/JS modes
+  (setq apheleia-mode-alist
+        (seq-filter (lambda (pair)
+                      (memq (car pair) '(typescript-mode typescript-ts-mode tsx-ts-mode
+                                         js-mode js-ts-mode jsx-mode)))
+                    apheleia-mode-alist)))
+
+;; Disable LSP formatting in favor of apheleia for TS/JS
+
+;;perf
+(setq +format-with-lsp nil)
+(setq vterm-timer-delay nil)
+(setq gc-cons-threshold 100000000) 
+(setenv "LSP_USE_PLISTS" "true")
+(setq lsp-use-plists t)
